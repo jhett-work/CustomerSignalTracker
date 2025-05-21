@@ -26,7 +26,8 @@ def clean_company_name(company: str) -> str:
     suffixes = [
         r"\bInc\b", r"\bInc\.\b", r"\bCorp\b", r"\bCorp\.\b", 
         r"\bLLC\b", r"\bL\.L\.C\.\b", r"\bLtd\b", r"\bLtd\.\b",
-        r"\bLimited\b", r"\bLLC\.\b", r"\bCorporation\b"
+        r"\bLimited\b", r"\bLLC\.\b", r"\bCorporation\b", r"\bCompany\b",
+        r"\bGmbH\b", r"\bAG\b", r"\bS\.A\.\b", r"\bPlc\b", r"\bGroup\b"
     ]
     
     clean = company
@@ -38,6 +39,67 @@ def clean_company_name(company: str) -> str:
     clean = re.sub(r'\s+', ' ', clean).strip()
     
     return clean
+
+
+def guess_company_domain(company: str) -> List[str]:
+    """
+    Generate likely domain variations for a company name.
+    
+    Args:
+        company: Company name
+        
+    Returns:
+        List of potential domain names
+    """
+    clean_name = clean_company_name(company)
+    
+    # Handle common special cases
+    special_cases = {
+        "microsoft": ["microsoft.com"],
+        "shopify": ["shopify.com"],
+        "adobe": ["adobe.com"],
+        "amazon": ["amazon.com"],
+        "google": ["google.com"],
+        "facebook": ["facebook.com", "meta.com"],
+        "meta": ["meta.com", "facebook.com"],
+        "perplexity": ["perplexity.ai", "perplexityai.com"],
+        "perplexity ai": ["perplexity.ai", "perplexityai.com"],
+        "apple": ["apple.com"],
+        "netflix": ["netflix.com"],
+        "twitter": ["twitter.com", "x.com"],
+        "x": ["x.com", "twitter.com"],
+        "salesforce": ["salesforce.com"],
+    }
+    
+    lower_name = clean_name.lower()
+    if lower_name in special_cases:
+        return special_cases[lower_name]
+    
+    # Generate domain variations
+    variations = []
+    
+    # Remove spaces for domain creation
+    no_spaces = clean_name.replace(" ", "").lower()
+    with_hyphens = clean_name.replace(" ", "-").lower()
+    
+    # Generate common variations
+    variations.extend([
+        f"{no_spaces}.com",
+        f"{with_hyphens}.com",
+        f"{no_spaces}.ai",
+        f"{with_hyphens}.ai",
+        f"{no_spaces}.io",
+        f"{with_hyphens}.io",
+        f"{no_spaces}.co",
+        f"{with_hyphens}.co",
+    ])
+    
+    # For companies with spaces, try abbreviations (e.g. "Acme Corp" -> "ac.com")
+    if " " in clean_name:
+        abbr = "".join(word[0] for word in clean_name.split())
+        variations.append(f"{abbr.lower()}.com")
+    
+    return variations
 
 
 def extract_domain(url: str) -> Optional[str]:
