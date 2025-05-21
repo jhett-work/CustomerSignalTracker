@@ -53,5 +53,9 @@ waitForPort = 5000
 run = ["sh", "-c", "python -m cdp_signal_scanner.main --companies \"Adobe,Microsoft,Shopify\" --output signals.csv"]
 
 [[ports]]
+localPort = 4000
+externalPort = 3000
+
+[[ports]]
 localPort = 5000
 externalPort = 80
