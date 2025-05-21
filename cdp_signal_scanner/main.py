@@ -18,6 +18,7 @@ from .data_sources.greenhouse import GreenhouseSource
 from .data_sources.indeed import IndeedSource
 from .data_sources.careers_page import CareersPageSource
 from .data_sources.google_cse import GoogleCSESource
+from .data_sources.business_documents import BusinessDocumentsSource
 from .scoring import SignalScorer
 
 # Set up logging
@@ -48,6 +49,7 @@ async def scan_company(company: str, config: dict, scorer: SignalScorer) -> List
     # Initialize data sources
     greenhouse = GreenhouseSource(config)
     careers = CareersPageSource(config)
+    business_docs = BusinessDocumentsSource(config)
     
     # Check which API-dependent sources we can use
     google_cse = None
@@ -64,6 +66,7 @@ async def scan_company(company: str, config: dict, scorer: SignalScorer) -> List
     tasks = [
         greenhouse.gather_signals(company),
         careers.gather_signals(company),
+        business_docs.gather_signals(company),
     ]
     
     # Add optional sources if available
@@ -76,7 +79,7 @@ async def scan_company(company: str, config: dict, scorer: SignalScorer) -> List
     
     # Process results and handle exceptions
     all_signals = []
-    source_names = ["Greenhouse", "Careers Page"] 
+    source_names = ["Greenhouse", "Careers Page", "Business Documents"] 
     if google_cse:
         source_names.append("Google CSE")
     if indeed:

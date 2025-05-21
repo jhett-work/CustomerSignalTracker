@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>CDP Signal Scanner - Results</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <style>
+            body { padding-top: 2rem; padding-bottom: 2rem; }
+            .results-container { max-width: 1000px; margin: 0 auto; }
+            .flash-message { margin-bottom: 1rem; }
+            .signal-card { margin-bottom: 1rem; }
+            .score-badge { font-size: 1.2rem; }
+            .loading-spinner { display: flex; justify-content: center; margin: 3rem 0; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="results-container">
+                <h1 class="text-center mb-4">CDP Signal Scanner Results</h1>
+                
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category if category != 'error' else 'danger' }} flash-message">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Scanning {{ companies|length }} companies</h5>
+                        <a href="{{ url_for('index') }}" class="btn btn-outline-primary btn-sm">New Scan</a>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <strong>Companies:</strong> {{ companies|join(", ") }}
+                        </div>
+                        
+                        {% if not scan_complete %}
+                            <div id="scan-status" class="alert alert-info">
+                                Scan in progress... This may take a few minutes depending on the number of companies.
+                            </div>
+                            <div id="loading-spinner" class="loading-spinner">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div id="scan-status" class="alert alert-success">
+                                Scan complete!
+                            </div>
+                        {% endif %}
+                        
+                        <div id="scan-actions" class="text-center" {% if not scan_complete %}style="display: none;"{% endif %}>
+                            <a href="{{ url_for('download_results', session_id=session_id) }}" class="btn btn-success">
+                                Download CSV
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="results-container">
+                    {% if results %}
+                        <h3>Found {{ results|length }} signals:</h3>
+                        
+                        {% for result in results %}
+                            <div class="card signal-card">
+                                <div class="card-header d-flex justify-content-between">
+                                    <span>{{ result.account }}</span>
+                                    <span class="badge bg-primary score-badge">Score: {{ result.score }}</span>
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ result.signal_category }}</h5>
+                                    <p class="card-text">{{ result.snippet }}</p>
+                                    <a href="{{ result.source_url }}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                                        View Source
+                                    </a>
+                                </div>
+                                <div class="card-footer text-muted">
+                                    Source: {{ result.source }}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div id="no-results" class="alert alert-warning" {% if not scan_complete %}style="display: none;"{% endif %}>
+                            No signals found for the specified companies.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <script>
+            {% if not scan_complete %}
+            // Start the scan
+            fetch('/api/scan', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    companies: '{{ companies_str }}',
+                    session_id: '{{ session_id }}'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Scan started:', data);
+                
+                // Poll for results
+                const checkStatus = () => {
+                    fetch(`/api/scan_status?session_id={{ session_id }}`)
+                        .then(response => response.json())
+                        .then(statusData => {
+                            console.log('Status update:', statusData);
+                            
+                            if (statusData.status === 'complete') {
+                                // Update the UI with results
+                                document.getElementById('scan-status').className = 'alert alert-success';
+                                document.getElementById('scan-status').textContent = 'Scan complete!';
+                                document.getElementById('loading-spinner').style.display = 'none';
+                                document.getElementById('scan-actions').style.display = 'block';
+                                
+                                // Display results
+                                const resultsContainer = document.getElementById('results-container');
+                                
+                                if (statusData.results_count > 0) {
+                                    // Build results HTML
+                                    let resultsHtml = `<h3>Found ${statusData.results_count} signals:</h3>`;
+                                    
+                                    statusData.results.forEach(result => {
+                                        resultsHtml += `
+                                            <div class="card signal-card">
+                                                <div class="card-header d-flex justify-content-between">
+                                                    <span>${result.account}</span>
+                                                    <span class="badge bg-primary score-badge">Score: ${result.score}</span>
+                                                </div>
+                                                <div class="card-body">
+                                                    <h5 class="card-title">${result.signal_category}</h5>
+                                                    <p class="card-text">${result.snippet}</p>
+                                                    <a href="${result.source_url}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                                                        View Source
+                                                    </a>
+                                                </div>
+                                                <div class="card-footer text-muted">
+                                                    Source: ${result.source || 'N/A'}
+                                                </div>
+                                            </div>
+                                        `;
+                                    });
+                                    
+                                    resultsContainer.innerHTML = resultsHtml;
+                                    
+                                    if (document.getElementById('no-results')) {
+                                        document.getElementById('no-results').style.display = 'none';
+                                    }
+                                } else {
+                                    // No results
+                                    if (document.getElementById('no-results')) {
+                                        document.getElementById('no-results').style.display = 'block';
+                                    } else {
+                                        resultsContainer.innerHTML = `
+                                            <div id="no-results" class="alert alert-warning">
+                                                No signals found for the specified companies.
+                                            </div>
+                                        `;
+                                    }
+                                }
+                                
+                                // Stop polling
+                                clearInterval(statusInterval);
+                            }
+                            else if (statusData.status === 'error') {
+                                // Show error
+                                document.getElementById('scan-status').className = 'alert alert-danger';
+                                document.getElementById('scan-status').textContent = 'Error: ' + statusData.message;
+                                document.getElementById('loading-spinner').style.display = 'none';
+                                
+                                // Stop polling
+                                clearInterval(statusInterval);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error checking status:', error);
+                        });
+                };
+                
+                // Check status every 5 seconds
+                const statusInterval = setInterval(checkStatus, 5000);
+                
+                // Also check immediately
+                checkStatus();
+            })
+            .catch(error => {
+                console.error('Error starting scan:', error);
+                document.getElementById('scan-status').className = 'alert alert-danger';
+                document.getElementById('scan-status').textContent = 'Error starting scan. Please try again.';
+                document.getElementById('loading-spinner').style.display = 'none';
+            });
+            {% endif %}
+        </script>
+        
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    </body>
+    </html>
