@@ -110,7 +110,7 @@ async def scan_companies(companies: List[str]) -> pd.DataFrame:
         companies: List of company names to scan
         
     Returns:
-        DataFrame with aggregated signals and scores
+        DataFrame with aggregated signals and scores, sorted by total company score
     """
     # Load config
     config = load_config()
@@ -120,10 +120,19 @@ async def scan_companies(companies: List[str]) -> pd.DataFrame:
     
     # Scan all companies
     all_results = []
+    company_scores = {}
+    
     for company in companies:
         results = await scan_company(company, config, scorer)
+        
+        # Add company to each result and track total score
+        company_total_score = 0
         for result in results:
             result["account"] = company
+            company_total_score += result.get("score", 0)
+        
+        # Store company's total score for later sorting
+        company_scores[company] = company_total_score
         all_results.extend(results)
     
     # Convert to DataFrame
@@ -131,10 +140,17 @@ async def scan_companies(companies: List[str]) -> pd.DataFrame:
         logger.warning("No signals found for any company")
         # Create empty DataFrame with expected columns
         return pd.DataFrame(columns=[
-            "account", "signal_category", "snippet", "score", "source_url"
+            "account", "signal_category", "snippet", "score", "source_url", "total_company_score"
         ])
     
+    # Create main results DataFrame
     df = pd.DataFrame(all_results)
+    
+    # Add total company score to each row
+    df["total_company_score"] = df["account"].map(company_scores)
+    
+    # Sort by total company score (descending) and then by individual signal score (descending)
+    df = df.sort_values(by=["total_company_score", "score"], ascending=[False, False])
     
     # Ensure the DataFrame has all required columns
     required_columns = ["account", "signal_category", "snippet", "score", "source_url"]

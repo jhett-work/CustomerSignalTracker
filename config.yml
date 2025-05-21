@@ -44,37 +44,42 @@ keywords:
     - adevinta
     - hightouch
 
-  # Target persona job titles
+  # Target persona job titles - focused on CDP decision makers and implementers
   target_personas:
-    - director data platform
-    - vp marketing
-    - growth marketing manager
-    - cto
-    - vp engineering
-    - director security
-    - marketing ops
+    # Executive roles (higher score)
     - chief marketing officer
     - chief data officer
     - chief digital officer
+    - cto
+    - vp marketing
+    - vp data
+    - vp analytics
+    - vp engineering
     - vp product
+    
+    # Director-level roles (medium-high score)
+    - director data platform
+    - director of marketing technology
+    - director of data
+    - director of analytics
     - head of analytics
     - head of data
-    - director of marketing technology
-    - marketing technology
-    - marketing operations
+    - head of martech
+    
+    # Manager and specialist roles (medium score)
+    - marketing technology manager
+    - marketing operations manager
+    - data engineering manager
+    - analytics engineering manager
+    - growth marketing manager
+    
+    # Technical implementers (medium-low score)
+    - data engineer
     - analytics engineer
-    - growth marketing
     - marketing data analyst
     - data scientist
-    - lifecycle marketing
-    - marketing ops
-    - customer data analyst
-    - customer insights
-    - personalization manager
-    - audience strategy
-    - customer journey manager
-    - crm manager
-    - marketing automation
+    - marketing technology specialist
+    - customer data architect
 
   # CDP-related concepts
   cdp_related:
