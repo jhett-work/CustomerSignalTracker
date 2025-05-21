@@ -151,18 +151,39 @@ class GreenhouseSource(DataSourceBase):
         # Clean and lowercase text for matching
         clean_title = self.clean_text(title)
         clean_dept = self.clean_text(department)
+        clean_content = self.clean_text(content) if content else ""
         
         # Check if it's a target persona
         if self._is_target_persona(clean_title):
             return True
         
+        # Analytics Engineer and Data Scientist roles can be highly relevant
+        if "analytics engineer" in clean_title or "data scientist" in clean_title:
+            if any(keyword in clean_title or keyword in clean_dept or keyword in clean_content 
+                  for keyword in ["growth", "marketing", "customer"]):
+                return True
+        
+        # Check if title contains data roles we're specifically interested in
+        data_roles = ["data", "analytics", "customer insights", "audience", "segmentation"]
+        if any(role in clean_title for role in data_roles):
+            return True
+        
         # Check if department is relevant
-        relevant_departments = ["marketing", "data", "analytics", "engineering", "product"]
+        relevant_departments = ["marketing", "data", "analytics", "engineering", "product", "growth"]
         if any(dept in clean_dept for dept in relevant_departments):
-            # Check if any CDP-related keywords are in the title
+            # Check if any CDP-related keywords are in the title or content
             cdp_keywords = self.config["keywords"]["cdp_related"] + self.config["keywords"]["cdp_vendors"]
+            data_tech = self.config["keywords"]["data_tech"]
+            
+            # Check title for CDP keywords
             if any(keyword in clean_title for keyword in cdp_keywords):
                 return True
+                
+            # Check for combinations of data technologies and customer-focused terms in content
+            if clean_content and any(tech in clean_content for tech in data_tech):
+                customer_terms = ["customer", "user", "audience", "segment", "profile", "personalization"]
+                if any(term in clean_content for term in customer_terms):
+                    return True
         
         return False
     
@@ -177,4 +198,26 @@ class GreenhouseSource(DataSourceBase):
             True if it's a target persona
         """
         clean_title = self.clean_text(title)
-        return any(persona in clean_title for persona in self.config["keywords"]["target_personas"])
+        
+        # Direct match with predefined target personas
+        if any(persona in clean_title for persona in self.config["keywords"]["target_personas"]):
+            return True
+            
+        # Special case for data science roles in marketing/growth
+        if ("data scientist" in clean_title or "analytics engineer" in clean_title):
+            if "growth" in clean_title or "marketing" in clean_title or "customer" in clean_title:
+                return True
+                
+        # Check for composite roles that combine target areas
+        target_areas = ["data", "analytics", "marketing", "customer", "audience", "growth"]
+        target_roles = ["lead", "manager", "director", "vp", "head", "specialist", "engineer", "analyst"]
+        
+        # Count how many target areas are in the title
+        area_matches = sum(1 for area in target_areas if area in clean_title)
+        role_matches = sum(1 for role in target_roles if role in clean_title)
+        
+        # If we have both a role and an area match, it's likely a target persona
+        if area_matches >= 1 and role_matches >= 1:
+            return True
+            
+        return False

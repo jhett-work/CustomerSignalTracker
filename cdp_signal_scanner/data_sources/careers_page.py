@@ -456,6 +456,20 @@ class CareersPageSource(DataSourceBase):
         # Check if it's a target persona
         if any(persona in clean_title for persona in self.config["keywords"]["target_personas"]):
             return True
+            
+        # Analytics Engineer and Data Scientist roles can be highly relevant
+        if "analytics engineer" in clean_title or "data scientist" in clean_title:
+            if any(keyword in clean_title or keyword in clean_desc 
+                  for keyword in ["growth", "marketing", "customer"]):
+                return True
+                
+        # Check if title contains data roles we're specifically interested in
+        data_roles = ["data", "analytics", "customer insights", "audience", "segmentation"]
+        if any(role in clean_title for role in data_roles):
+            # Look for customer-focused terms in the description
+            customer_terms = ["customer", "user", "audience", "segment", "profile", "personalization"]
+            if any(term in clean_desc for term in customer_terms):
+                return True
         
         # Check if any CDP-related keywords are in the title or description
         cdp_keywords = self.config["keywords"]["cdp_related"] + self.config["keywords"]["cdp_vendors"] + self.config["keywords"]["data_tech"]
