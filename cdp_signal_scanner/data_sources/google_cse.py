@@ -189,25 +189,45 @@ class GoogleCSESource(DataSourceBase):
         combined_text = f"{clean_title} {clean_snippet}"
         
         # Check for CDP vendors
-        if any(vendor in combined_text for vendor in self.config["keywords"]["cdp_vendors"]):
+        if any(vendor.lower() in combined_text for vendor in self.config["keywords"]["cdp_vendors"]):
             return True
         
         # Check for CDP concepts
-        if any(concept in combined_text for concept in self.config["keywords"]["cdp_related"]):
+        if any(concept.lower() in combined_text for concept in self.config["keywords"]["cdp_related"]):
             return True
         
-        # Check for data tech
-        if any(tech in combined_text for tech in self.config["keywords"]["data_tech"]):
+        # Check for combined data tech + customer terms
+        data_tech_terms = [tech.lower() for tech in self.config["keywords"]["data_tech"]]
+        customer_terms = ["customer", "user", "experience", "journey", "personalization", "segment"]
+        
+        if any(tech in combined_text for tech in data_tech_terms) and any(term in combined_text for term in customer_terms):
             return True
         
-        # Check for executive movements
-        exec_keywords = ["appoint", "hire", "join", "name", "chief", "vp", "director"]
-        if any(keyword in combined_text for keyword in exec_keywords):
+        # Check for executive movements related to data, marketing or customer experience
+        exec_keywords = ["appoint", "hire", "join", "name", "chief", "vp", "director", "head of"]
+        target_departments = ["data", "analytics", "marketing", "digital", "customer experience", "technology"]
+        
+        if any(keyword in combined_text for keyword in exec_keywords) and any(dept in combined_text for dept in target_departments):
             return True
         
-        # Check for funding and growth
+        # Check for funding and growth with tech indicators
         growth_keywords = ["funding", "series", "raised", "expansion", "launches", "growth"]
-        if any(keyword in combined_text for keyword in growth_keywords):
+        tech_indicators = ["platform", "solution", "technology", "software", "data-driven", "analytics"]
+        
+        if any(keyword in combined_text for keyword in growth_keywords) and any(indicator in combined_text for indicator in tech_indicators):
+            return True
+            
+        # Special case: check for phrases that strongly indicate CDP interest
+        strong_indicators = [
+            "unified customer data", 
+            "customer 360", 
+            "single customer view",
+            "first-party data strategy",
+            "data activation",
+            "personalization strategy"
+        ]
+        
+        if any(indicator in combined_text for indicator in strong_indicators):
             return True
         
         return False
@@ -259,13 +279,17 @@ class GoogleCSESource(DataSourceBase):
             
         try:
             # Create targeted keyword lists for our search
-            cdp_related_keywords = self.config["keywords"]["cdp_related"][:5]
-            cdp_vendors = self.config["keywords"]["cdp_vendors"][:5]
+            cdp_related_keywords = self.config["keywords"]["cdp_related"][:8]  # Increased from 5
+            cdp_vendors = self.config["keywords"]["cdp_vendors"][:8]  # Increased from 5
+            data_tech_keywords = self.config["keywords"]["data_tech"][:5]  # Added data tech keywords
+            personalization_terms = ["real-time personalization", "customer journey", "personalized experience"]
             
             # Try to find signals for each keyword group
             for keyword_group, group_name in [
                 (cdp_vendors, "CDP Vendors"),
-                (cdp_related_keywords, "CDP Concepts")
+                (cdp_related_keywords, "CDP Concepts"),
+                (data_tech_keywords, "Data Technologies"),
+                (personalization_terms, "Personalization")
             ]:
                 for keyword in keyword_group:
                     # Create search query
