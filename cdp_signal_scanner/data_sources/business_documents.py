@@ -452,7 +452,17 @@ class BusinessDocumentsSource(DataSourceBase):
                 "/media-center",
                 "/about/news",
                 "/about/press",
-                "/corporate/news"
+                "/corporate/news",
+                "/company/news",
+                "/company/newsroom",
+                "/about-us/news",
+                "/en/news",
+                "/en/newsroom",
+                "/en-us/news",
+                "/news-events",
+                "/news-insights",
+                "/blog",
+                "/company-updates"
             ]
             
             # Try each pattern to find the news page
@@ -544,6 +554,7 @@ class BusinessDocumentsSource(DataSourceBase):
                         
                         # Check for CDP-related keywords
                         cdp_keywords = self.config["keywords"]["cdp_related"] + self.config["keywords"]["cdp_vendors"]
+                        data_tech_keywords = self.config["keywords"]["data_tech"]
                         article_text_lower = self.clean_text(article_text)
                         
                         # Find paragraphs containing CDP keywords
@@ -564,6 +575,16 @@ class BusinessDocumentsSource(DataSourceBase):
                                 # Limit the number of paragraphs
                                 if len(relevant_paragraphs) >= 5:
                                     break
+                                    
+                            # Also check for data tech keywords in combination with customer terms
+                            elif any(tech.lower() in cleaned_para for tech in self.config["keywords"]["data_tech"]):
+                                customer_terms = ["customer", "user", "experience", "journey", "personalization", "segment"]
+                                if any(term.lower() in cleaned_para for term in customer_terms):
+                                    relevant_paragraphs.append(paragraph)
+                                    
+                                    # Limit the number of paragraphs
+                                    if len(relevant_paragraphs) >= 5:
+                                        break
                         
                         # If we found relevant content, create a signal
                         if relevant_paragraphs:
