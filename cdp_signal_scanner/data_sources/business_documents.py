@@ -256,7 +256,7 @@ class BusinessDocumentsSource(DataSourceBase):
                 logger.info(f"Could not find website for {company}, skipping investor relations scan")
                 return signals
             
-            # Common IR page patterns
+            # Common IR page patterns - enhanced based on common corporate website structures
             ir_patterns = [
                 "/investor-relations",
                 "/investors",
@@ -267,7 +267,23 @@ class BusinessDocumentsSource(DataSourceBase):
                 "/quarterly-results",
                 "/financial-information",
                 "/about/investors",
-                "/about/investor-relations"
+                "/about/investor-relations",
+                # Additional patterns observed in Fortune 500 companies
+                "/en-us/investor",
+                "/en/investor",
+                "/company/investor-relations",
+                "/company/investors",
+                "/corporate/investor-relations",
+                "/corporate/investors",
+                "/about/ir",
+                "/msft",              # Microsoft-specific pattern
+                "/investor/default",  # Microsoft-specific pattern
+                "/en-us/investor/default",
+                # Additional patterns for international companies
+                "/relations/investor",
+                "/invest",
+                "/shareholder-information",
+                "/financial-reports"
             ]
             
             # Try each pattern to find the IR page
@@ -298,6 +314,10 @@ class BusinessDocumentsSource(DataSourceBase):
                 "annual report", "annual-report", "10-k", "10k",
                 "investor presentation", "investor-presentation",
                 "earnings", "financial results", "quarterly report",
+                "investor day", "strategic priorities", "earnings call transcript",
+                "investor briefing", "shareholder letter", "annual meeting",
+                "capital markets day", "business strategy", "growth strategy",
+                "digital transformation", "technology roadmap",
                 "investor day", "shareholder"
             ]
             

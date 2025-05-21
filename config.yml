@@ -81,36 +81,87 @@ keywords:
     - marketing technology specialist
     - customer data architect
 
-  # CDP-related concepts
+  # CDP-related concepts - Enhanced with advanced concepts from industry resources
   cdp_related:
+    # Core CDP Terminology
     - customer data platform
     - cdp
-    - data integration
-    - customer 360
+    - real-time cdp
+    - enterprise cdp
+    
+    # Data Unification Concepts
     - unified data
-    - real-time personalization
-    - data orchestration
-    - customer journey
-    - omnichannel
-    - first-party data
-    - customer identity
-    - identity resolution
-    - audience segmentation
-    - data activation
     - unified customer profile
+    - unified view of customer
+    - single customer view
+    - golden record
+    - single source of truth
+    - customer 360
+    - 360-degree customer view
+    - identity resolution
+    - identity management
+    - identity graph
+    - profile unification
+    - linked profiles
+    
+    # Data Collection & Integration
+    - data integration
+    - data ingestion
+    - data orchestration
+    - first-party data
+    - zero-party data
+    - second-party data
+    - third-party data
+    - data standardization
+    - data normalization
+    - event tracking
+    - data pipelines
     - customer data infrastructure
-    - audience targeting
-    - user segmentation
-    - data governance
-    - predictive analytics
-    - personalized experience
-    - user behavior analysis
-    - customer engagement
+    - data collection
+    - data activation
     - data modeling
     - zero copy architecture
-    - customer profile
-    - linked profiles
-    - data standardization
+    
+    # Customer Experience & Personalization
+    - real-time personalization
+    - customer journey
+    - journey orchestration
+    - omnichannel experience
+    - omnichannel orchestration
+    - cross-channel marketing
+    - personalized experience
+    - hyper-personalization
+    - next best action
+    - customer engagement
+    - contextual interactions
+    - behavior-based targeting
+    
+    # Analytics & Segmentation
+    - audience segmentation
+    - user segmentation
+    - predictive analytics
+    - behavioral analytics
+    - predictive modeling
+    - customer analytics
+    - segment activation
+    - audience targeting
+    - prescriptive analytics
+    - journey analytics
+    - propensity modeling
+    - user behavior analysis
+    - real-time analytics
+    - customer intelligence
+    
+    # Data Management & Governance
+    - data governance
+    - consent management
+    - privacy by design
+    - customer trust
+    - data compliance
+    - data lineage
+    - GDPR compliance
+    - CCPA compliance
+    - data quality management
 
   # Data technology keywords
   data_tech:
