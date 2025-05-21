@@ -1,0 +1,106 @@
+# Scoring configuration
+scoring:
+  # Points for a job posting for a target persona with CDP keywords
+  hiring_target_persona_with_cdp_keywords: 5
+  
+  # Points for an executive move into a target persona role
+  executive_move_target_persona: 4
+  
+  # Points for explicitly naming a CDP vendor
+  explicit_cdp_vendor_mention: 4
+  
+  # Points for mentions of unified data concepts
+  unified_data_concepts: 3
+  
+  # Points for funding or expansion news
+  funding_or_expansion: 2
+
+# Keywords to look for in signals
+keywords:
+  # CDP vendor names
+  cdp_vendors:
+    - segment
+    - mparticle
+    - rudderstack
+    - tealium
+    - adobe real-time cdp
+    - blueconic
+    - lytics
+    - treasure data
+    - amperity
+    - exponea
+    - arm treasure data
+    - salesforce cdp
+    - oracle unity cdp
+
+  # Target persona job titles
+  target_personas:
+    - director data platform
+    - vp marketing
+    - growth marketing manager
+    - cto
+    - vp engineering
+    - director security
+    - marketing ops
+    - chief marketing officer
+    - chief data officer
+    - chief digital officer
+    - vp product
+    - head of analytics
+    - head of data
+    - director of marketing technology
+    - marketing technology
+    - marketing operations
+
+  # CDP-related concepts
+  cdp_related:
+    - customer data platform
+    - cdp
+    - data integration
+    - customer 360
+    - unified data
+    - real-time personalization
+    - data orchestration
+    - customer journey
+    - omnichannel
+    - first-party data
+    - customer identity
+    - identity resolution
+    - audience segmentation
+    - data activation
+
+  # Data technology keywords
+  data_tech:
+    - snowflake
+    - dbt
+    - fivetran
+    - bigquery
+    - redshift
+    - databricks
+    - data lakehouse
+    - data warehouse
+    - data mesh
+    - event stream
+    - kafka
+    - data pipeline
+
+# API configuration
+api:
+  # SerpAPI settings
+  serpapi:
+    rate_limit: 5  # Requests per second
+    backoff_factor: 1.5
+    max_retries: 3
+  
+  # Google Custom Search API settings
+  google_cse:
+    rate_limit: 10  # Requests per minute (Google's free tier limit)
+    backoff_factor: 2
+    max_retries: 3
+
+# Web scraping configuration
+scraping:
+  timeout: 10  # Seconds
+  max_retries: 3
+  headers:
+    User-Agent: "CDP Signal Scanner/0.1.0 (research tool, support@example.com)"

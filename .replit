@@ -1,0 +1,40 @@
+modules = ["python-3.11"]
+
+[nix]
+channel = "stable-24_05"
+packages = ["glibcLocales", "libyaml"]
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "CDP Signal Scanner"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "run_cdp_scanner"
+
+[[workflows.workflow]]
+name = "CDP Signal Scanner"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python -m cdp_signal_scanner.main --companies \"Adobe,Microsoft,Shopify\" --output signals.csv"
+
+[[workflows.workflow]]
+name = "run_cdp_scanner"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python -m cdp_signal_scanner.main --companies \"Adobe,Microsoft,Shopify\" --output signals.csv"
+
+[deployment]
+run = ["sh", "-c", "python -m cdp_signal_scanner.main --companies \"Adobe,Microsoft,Shopify\" --output signals.csv"]
